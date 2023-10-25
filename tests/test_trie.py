@@ -148,7 +148,7 @@ def test_trie_items():
 
 def test_trie_iter():
     trie = datrie.Trie(string.ascii_lowercase)
-    assert list(trie) == []
+    assert not list(trie)
 
     trie['foo'] = trie['bar'] = trie['foobar'] = 42
     assert list(trie) == ['bar', 'foo', 'foobar']
@@ -293,13 +293,13 @@ class TestPrefixSearch(object):
         assert list(prefixes) == ['pr', 'produce', 'producer', 'producers']
 
         no_prefixes = trie.iter_prefixes('vasia')
-        assert list(no_prefixes) == []
+        assert not list(no_prefixes)
 
         values = trie.iter_prefix_values('producers')
         assert list(values) == ['foo', 8, 9, 1]
 
         no_prefixes = trie.iter_prefix_values('vasia')
-        assert list(no_prefixes) == []
+        assert not list(no_prefixes)
 
         items = trie.iter_prefix_items('producers')
         assert next(items) == ('pr', 'foo')
@@ -308,7 +308,7 @@ class TestPrefixSearch(object):
         assert next(items) == ('producers', 1)
 
         no_prefixes = trie.iter_prefix_items('vasia')
-        assert list(no_prefixes) == []
+        assert not list(no_prefixes)
 
     def test_trie_prefixes(self):
         trie = self._trie()
@@ -405,10 +405,14 @@ class TestPrefixSearch(object):
 def test_trie_fuzzy():
     russian = 'абвгдеёжзиклмнопрстуфхцчъыьэюя'
     alphabet = russian.upper() + string.ascii_lowercase
-    words = list({
-        "".join(random.choice(alphabet) for x in range(random.randint(8, 16)))
-        for y in range(1000)
-    })
+    words = list(
+        {
+            "".join(
+                random.choice(alphabet) for _ in range(random.randint(8, 16))
+            )
+            for _ in range(1000)
+        }
+    )
 
     trie = datrie.Trie(alphabet)
 

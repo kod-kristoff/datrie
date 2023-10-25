@@ -22,8 +22,10 @@ def random_words(num):
     russian = 'абвгдеёжзиклмнопрстуфхцчъыьэюя'
     alphabet = russian + string.ascii_letters
     return [
-        "".join([random.choice(alphabet) for x in range(random.randint(1,15))])
-        for y in range(num)
+        "".join(
+            [random.choice(alphabet) for _ in range(random.randint(1, 15))]
+        )
+        for _ in range(num)
     ]
 
 def truncated_words(words):
@@ -31,7 +33,7 @@ def truncated_words(words):
 
 def prefixes1k(words, prefix_len):
     words = [w for w in words if len(w) >= prefix_len]
-    every_nth = int(len(words)/1000)
+    every_nth = len(words) // 1000
     _words = [w[:prefix_len] for w in words[::every_nth]]
     return _words[:1000]
 
@@ -101,15 +103,15 @@ words = WORDS100k
 NON_WORDS_10k = NON_WORDS100k[:10000]
 NON_WORDS_1k = ['ыва', 'xyz', 'соы', 'Axx', 'avы']*200
 """
-    dict_setup = common_setup + 'data = dict((word, 1) for word in words); empty_data=dict()'
-    trie_setup = common_setup + 'data = create_trie(); empty_data = datrie.Trie(ALPHABET)'
+    dict_setup = f'{common_setup}data = dict((word, 1) for word in words); empty_data=dict()'
+    trie_setup = f'{common_setup}data = create_trie(); empty_data = datrie.Trie(ALPHABET)'
 
     for test_name, test, descr, op_count, repeats in tests:
         t_dict = timeit.Timer(test, dict_setup)
         t_trie = timeit.Timer(test, trie_setup)
 
-        bench('dict '+test_name, t_dict, descr, op_count, repeats)
-        bench('trie '+test_name, t_trie, descr, op_count, repeats)
+        bench(f'dict {test_name}', t_dict, descr, op_count, repeats)
+        bench(f'trie {test_name}', t_trie, descr, op_count, repeats)
 
     # trie-specific benchmarks
 
@@ -212,27 +214,24 @@ NON_WORDS_1k = ['ыва', 'xyz', 'соы', 'Axx', 'avы']*200
 
     for meth in ('longest_prefix', 'longest_prefix_item', 'longest_prefix_value'):
         bench(
-            'trie.%s (hits)' % meth,
-            timeit.Timer(
-                "for word in words: data.%s(word)" % meth,
-                trie_setup
-            )
+            f'trie.{meth} (hits)',
+            timeit.Timer(f"for word in words: data.{meth}(word)", trie_setup),
         )
 
         bench(
-            'trie.%s (misses)' % meth,
+            f'trie.{meth} (misses)',
             timeit.Timer(
-                "for word in NON_WORDS100k: data.%s(word, default=None)" % meth,
-                trie_setup
-            )
+                f"for word in NON_WORDS100k: data.{meth}(word, default=None)",
+                trie_setup,
+            ),
         )
 
         bench(
-            'trie.%s (mixed)' % meth,
+            f'trie.{meth} (mixed)',
             timeit.Timer(
-                "for word in MIXED_WORDS100k: data.%s(word, default=None)" % meth,
-                trie_setup
-            )
+                f"for word in MIXED_WORDS100k: data.{meth}(word, default=None)",
+                trie_setup,
+            ),
         )
 
 
@@ -246,10 +245,9 @@ NON_WORDS_1k = ['ыва', 'xyz', 'соы', 'Axx', 'avы']*200
     for xxx, avg, data in prefix_data:
         for meth in ('items', 'keys', 'values'):
             bench(
-                'trie.%s(prefix="%s"), %s' % (meth, xxx, avg),
+                f'trie.{meth}(prefix="{xxx}"), {avg}',
                 timeit.Timer(
-                    "for word in %s: data.%s(word)" % (data, meth),
-                    trie_setup
+                    f"for word in {data}: data.{meth}(word)", trie_setup
                 ),
                 'K ops/sec',
                 op_count=1,
